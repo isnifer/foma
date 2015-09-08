@@ -54,6 +54,7 @@ class FormDemo extends React.Component {
                     <button
                         type="button"
                         className="btn btn-success"
+                        disabled={!this.props.isValid}
                         onClick={::this.submitForm}>
                         Сохранить
                     </button>

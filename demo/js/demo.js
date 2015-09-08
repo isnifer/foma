@@ -154,6 +154,7 @@
 	                        {
 	                            type: 'button',
 	                            className: 'btn btn-success',
+	                            disabled: !this.props.isValid,
 	                            onClick: this.submitForm.bind(this) },
 	                        'Сохранить'
 	                    )
