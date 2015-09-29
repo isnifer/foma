@@ -25,7 +25,6 @@ test('Test valid data', assert => {
 
     TestUtils.Simulate.change(username, {target: {value: 'Foma'}});
     TestUtils.Simulate.change(password, {target: {value: 123456}});
-
     assert.false(submit.props.disabled, 'Disabled status should be false');
 
     assert.end();
@@ -47,6 +46,12 @@ test('Test invalid data', assert => {
 
     setTimeout(function () {
         assert.true(submit.props.disabled, 'Disabled status should be true, cause password incorrect');
+
+        TestUtils.Simulate.change(password, {target: {value: 123456}});
+
+        setTimeout(function () {
+            assert.false(submit.props.disabled, 'Disabled status should be false');
+        }, 0);
     }, 0);
 
     assert.end();
