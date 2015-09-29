@@ -68,8 +68,11 @@
 
 	var _libIndex2 = _interopRequireDefault(_libIndex);
 
-	var Validator = (function (_React$Component) {
-	    _inherits(Validator, _React$Component);
+	var Component = _react2['default'].Component;
+	var PropTypes = _react2['default'].PropTypes;
+
+	var Validator = (function (_Component) {
+	    _inherits(Validator, _Component);
 
 	    function Validator() {
 	        _classCallCheck(this, _Validator);
@@ -113,10 +116,10 @@
 	    var _Validator = Validator;
 	    Validator = (0, _valya2['default'])(Validator) || Validator;
 	    return Validator;
-	})(_react2['default'].Component);
+	})(Component);
 
-	var FormDemo = (function (_React$Component2) {
-	    _inherits(FormDemo, _React$Component2);
+	var FormDemo = (function (_Component2) {
+	    _inherits(FormDemo, _Component2);
 
 	    _createClass(FormDemo, null, [{
 	        key: 'displayName',
@@ -128,6 +131,11 @@
 	        _classCallCheck(this, _FormDemo);
 
 	        _get(Object.getPrototypeOf(_FormDemo.prototype), 'constructor', this).call(this, props, context);
+
+	        this.state = {
+	            username: null,
+	            password: null
+	        };
 	    }
 
 	    _createClass(FormDemo, [{
@@ -140,12 +148,120 @@
 	            }
 	        }
 	    }, {
+	        key: 'setUsername',
+	        value: function setUsername(e) {
+	            this.setState({ usernameValue: e.target.value });
+	        }
+	    }, {
+	        key: 'setPassword',
+	        value: function setPassword(e) {
+	            this.setState({ passwordValue: e.target.value });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var _this = this;
+
 	            return _react2['default'].createElement(
 	                'form',
-	                { name: this.props.name, style: { width: '500px' }, noValidate: true },
-	                this.props.children,
+	                {
+	                    name: 'formName',
+	                    style: {
+	                        width: '500px',
+	                        padding: '50px 0 0 50px'
+	                    },
+	                    noValidate: true },
+	                _react2['default'].createElement(
+	                    'div',
+	                    { className: 'form-group' },
+	                    _react2['default'].createElement(
+	                        'label',
+	                        { htmlFor: 'username' },
+	                        'Введи свой username'
+	                    ),
+	                    _react2['default'].createElement(
+	                        Validator,
+	                        {
+	                            value: this.state.usernameValue,
+	                            onEnd: function (isValid, message) {
+	                                _this.props.setValidationInfo({
+	                                    isValid: isValid,
+	                                    message: message,
+	                                    name: 'username'
+	                                });
+	                            },
+	                            validators: [{
+	                                validator: function validator(value, params) {
+	                                    if (value) {
+	                                        return Promise.resolve();
+	                                    }
+
+	                                    return Promise.reject(params.message);
+	                                },
+	                                params: {
+	                                    message: 'Field is required'
+	                                }
+	                            }],
+	                            initialValidation: true },
+	                        _react2['default'].createElement('input', {
+	                            type: 'text',
+	                            id: 'username',
+	                            className: 'form-control',
+	                            value: this.state.usernameValue,
+	                            onChange: this.setUsername.bind(this) })
+	                    )
+	                ),
+	                _react2['default'].createElement(
+	                    'div',
+	                    { className: 'form-group' },
+	                    _react2['default'].createElement(
+	                        'label',
+	                        { htmlFor: 'password' },
+	                        'Введи свой password'
+	                    ),
+	                    _react2['default'].createElement(
+	                        Validator,
+	                        {
+	                            value: this.state.passwordValue,
+	                            onEnd: function (isValid, message) {
+	                                _this.props.setValidationInfo({
+	                                    isValid: isValid,
+	                                    message: message,
+	                                    name: 'password'
+	                                });
+	                            },
+	                            validators: [{
+	                                validator: function validator(value, params) {
+	                                    if (value) {
+	                                        return Promise.resolve();
+	                                    }
+
+	                                    return Promise.reject(params.message);
+	                                },
+	                                params: {
+	                                    message: 'Field is required'
+	                                }
+	                            }, {
+	                                validator: function validator(value, params) {
+	                                    if (value) {
+	                                        return Promise.resolve();
+	                                    }
+
+	                                    return Promise.reject(params.message);
+	                                },
+	                                params: {
+	                                    message: 'Field is requireds'
+	                                }
+	                            }],
+	                            initialValidation: true },
+	                        _react2['default'].createElement('input', {
+	                            type: 'text',
+	                            id: 'password',
+	                            className: 'form-control',
+	                            value: this.state.passwordValue,
+	                            onChange: this.setPassword.bind(this) })
+	                    )
+	                ),
 	                _react2['default'].createElement(
 	                    'div',
 	                    { className: 'form-group' },
@@ -166,149 +282,9 @@
 	    var _FormDemo = FormDemo;
 	    FormDemo = (0, _libIndex2['default'])(FormDemo) || FormDemo;
 	    return FormDemo;
-	})(_react2['default'].Component);
+	})(Component);
 
-	var Demo = (function (_React$Component3) {
-	    _inherits(Demo, _React$Component3);
-
-	    _createClass(Demo, null, [{
-	        key: 'displayName',
-	        value: 'Demo',
-	        enumerable: true
-	    }]);
-
-	    function Demo(props, context) {
-	        _classCallCheck(this, Demo);
-
-	        _get(Object.getPrototypeOf(Demo.prototype), 'constructor', this).call(this, props, context);
-
-	        this.state = {
-	            username: null,
-	            password: null
-	        };
-	    }
-
-	    _createClass(Demo, [{
-	        key: 'setUsername',
-	        value: function setUsername(e) {
-	            this.setState({ usernameValue: e.target.value });
-	        }
-	    }, {
-	        key: 'setPassword',
-	        value: function setPassword(e) {
-	            this.setState({ passwordValue: e.target.value });
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var _this = this;
-
-	            return _react2['default'].createElement(
-	                'div',
-	                { className: 'demo', style: { padding: '100px' } },
-	                _react2['default'].createElement(
-	                    FormDemo,
-	                    { name: 'demo', fields: [this.state.username, this.state.password] },
-	                    _react2['default'].createElement(
-	                        'div',
-	                        { className: 'form-group' },
-	                        _react2['default'].createElement(
-	                            'label',
-	                            { htmlFor: 'username' },
-	                            'Введи свой username'
-	                        ),
-	                        _react2['default'].createElement(
-	                            Validator,
-	                            {
-	                                value: this.state.usernameValue,
-	                                onEnd: function (isValid, message) {
-	                                    _this.setState({ username: {
-	                                            isValid: isValid,
-	                                            message: message,
-	                                            name: 'username'
-	                                        } });
-	                                },
-	                                validators: [{
-	                                    validator: function validator(value, params) {
-	                                        if (value) {
-	                                            return Promise.resolve();
-	                                        }
-
-	                                        return Promise.reject(params.message);
-	                                    },
-	                                    params: {
-	                                        message: 'Field is required'
-	                                    }
-	                                }],
-	                                initialValidation: true },
-	                            _react2['default'].createElement('input', {
-	                                type: 'text',
-	                                id: 'username',
-	                                className: 'form-control',
-	                                value: this.state.usernameValue,
-	                                onChange: this.setUsername.bind(this) })
-	                        )
-	                    ),
-	                    _react2['default'].createElement(
-	                        'div',
-	                        { className: 'form-group' },
-	                        _react2['default'].createElement(
-	                            'label',
-	                            { htmlFor: 'password' },
-	                            'Введи свой password'
-	                        ),
-	                        _react2['default'].createElement(
-	                            Validator,
-	                            {
-	                                value: this.state.passwordValue,
-	                                onEnd: function (isValid, message) {
-	                                    _this.setState({ password: {
-	                                            isValid: isValid,
-	                                            message: message,
-	                                            name: 'password'
-	                                        } });
-	                                },
-	                                validators: [{
-	                                    validator: function validator(value, params) {
-	                                        if (value) {
-	                                            return Promise.resolve();
-	                                        }
-
-	                                        return Promise.reject(params.message);
-	                                    },
-	                                    params: {
-	                                        message: 'Field is required'
-	                                    }
-	                                }, {
-	                                    validator: function validator(value, params) {
-	                                        if (value) {
-	                                            return Promise.resolve();
-	                                        }
-
-	                                        return Promise.reject(params.message);
-	                                    },
-	                                    params: {
-	                                        message: 'Field is requireds'
-	                                    }
-	                                }],
-	                                initialValidation: true },
-	                            _react2['default'].createElement('input', {
-	                                type: 'text',
-	                                id: 'password',
-	                                className: 'form-control',
-	                                value: this.state.passwordValue,
-	                                onChange: this.setPassword.bind(this) })
-	                        )
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-
-	    return Demo;
-	})(_react2['default'].Component);
-
-	_react2['default'].render(_react2['default'].createElement(Demo, null), document.querySelector('.main'));
+	_react2['default'].render(_react2['default'].createElement(FormDemo, null), document.querySelector('.main'));
 
 /***/ },
 /* 1 */
@@ -508,7 +484,9 @@
 	        currentQueue = queue;
 	        queue = [];
 	        while (++queueIndex < len) {
-	            currentQueue[queueIndex].run();
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
 	        }
 	        queueIndex = -1;
 	        len = queue.length;
@@ -560,7 +538,6 @@
 	    throw new Error('process.binding is not supported');
 	};
 
-	// TODO(shtylman)
 	process.cwd = function () { return '/' };
 	process.chdir = function (dir) {
 	    throw new Error('process.chdir is not supported');
@@ -42594,9 +42571,12 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var Component = _react2['default'].Component;
+	var PropTypes = _react2['default'].PropTypes;
+
 	exports['default'] = function (Foma) {
-	    return (function (_React$Component) {
-	        _inherits(_class, _React$Component);
+	    return (function (_Component) {
+	        _inherits(_class, _Component);
 
 	        _createClass(_class, null, [{
 	            key: 'displayName',
@@ -42613,30 +42593,52 @@
 	                isValid: true,
 	                isValidating: false,
 	                isInvalid: false,
-	                invalidFields: []
+	                invalidFields: [],
+	                setValidationInfo: this.setValidationInfo.bind(this)
 	            };
+
+	            // I want to manage fields without re-render
+	            this.fields = {};
 	        }
 
+	        /**
+	         * Validation method for All form fields. All fields are required.
+	         * @param {Object} validatorInfo - information from validator (Valya)
+	         * @param {Boolean} validatorInfo#isValid - validation flag for the field
+	         * @param {String} validatorInfo#message - validatation message for the field
+	         * @param {String} validatorInfo#name - name of the field
+	         */
+
 	        _createClass(_class, [{
-	            key: 'componentWillReceiveProps',
-	            value: function componentWillReceiveProps(nextProps) {
-	                if (nextProps.fields && nextProps.fields.length) {
-	                    this.setState({ isValidating: true });
+	            key: 'setValidationInfo',
+	            value: function setValidationInfo(validatorInfo) {
+	                var invalidFields = this.state.invalidFields.slice();
+	                var idx = invalidFields.indexOf(validatorInfo.name);
 
-	                    var result = nextProps.fields.reduce(function (result, item) {
-	                        if (item && !item.isValid) {
-	                            result.push(item);
-	                        }
-	                        return result;
-	                    }, []);
-
-	                    this.setState({
-	                        isValidating: false,
-	                        isValid: !result.length,
-	                        isInvalid: Boolean(result.length),
-	                        invalidFields: result
-	                    });
+	                // If Valya returned isValid and the field was valid before
+	                // we will don't do anything
+	                if (idx === -1 && validatorInfo.isValid) {
+	                    return;
 	                }
+
+	                this.setState({ isValidating: true });
+
+	                if (!validatorInfo.isValid) {
+	                    invalidFields.push(validatorInfo.name);
+	                } else {
+	                    if (idx !== -1) {
+	                        invalidFields.splice(idx, 1);
+	                    }
+	                }
+
+	                this.fields[validatorInfo.name] = validatorInfo;
+
+	                this.setState({
+	                    isValidating: false,
+	                    isValid: !invalidFields.length,
+	                    isInvalid: Boolean(invalidFields.length),
+	                    invalidFields: invalidFields
+	                });
 	            }
 	        }, {
 	            key: 'render',
@@ -42650,7 +42652,7 @@
 	        }]);
 
 	        return _class;
-	    })(_react2['default'].Component);
+	    })(Component);
 	};
 
 	module.exports = exports['default'];
