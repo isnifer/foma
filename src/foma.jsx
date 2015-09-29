@@ -1,7 +1,9 @@
 import React from 'react';
 
+const { Component, PropTypes } = React;
+
 export default Foma => {
-    return class extends React.Component {
+    return class extends Component {
         static displayName = 'Foma';
 
         constructor (props, context) {
@@ -11,28 +13,50 @@ export default Foma => {
                 isValid: true,
                 isValidating: false,
                 isInvalid: false,
-                invalidFields: []
+                invalidFields: [],
+                setValidationInfo: ::this.setValidationInfo
             };
+
+            // I want to manage fields without re-render
+            this.fields = {};
         }
 
-        componentWillReceiveProps (nextProps) {
-            if (nextProps.fields && nextProps.fields.length) {
-                this.setState({isValidating: true});
+        /**
+         * Validation method for All form fields. All fields are required.
+         * @param {Object} validatorInfo - information from validator (Valya)
+         * @param {Boolean} validatorInfo#isValid - validation flag for the field
+         * @param {String} validatorInfo#message - validatation message for the field
+         * @param {String} validatorInfo#name - name of the field
+         */
+        setValidationInfo (validatorInfo) {
+            var invalidFields = this.state.invalidFields.slice();
+            var idx = invalidFields.indexOf(validatorInfo.name);
 
-                var result = nextProps.fields.reduce(function (result, item) {
-                    if (item && !item.isValid) {
-                        result.push(item);
-                    }
-                    return result;
-                }, []);
-
-                this.setState({
-                    isValidating: false,
-                    isValid: !result.length,
-                    isInvalid: Boolean(result.length),
-                    invalidFields: result
-                });
+            // If Valya returned isValid and the field was valid before
+            // we will don't do anything
+            if (idx === -1 && validatorInfo.isValid) {
+                return;
             }
+
+            this.setState({isValidating: true});
+
+            if (!validatorInfo.isValid) {
+                invalidFields.push(validatorInfo.name);
+            } else {
+                if (idx !== -1) {
+                    invalidFields.splice(idx, 1);
+                }
+            }
+
+            this.fields[validatorInfo.name] = validatorInfo;
+
+            this.setState({
+                isValidating: false,
+                isValid: !invalidFields.length,
+                isInvalid: Boolean(invalidFields.length),
+                invalidFields: invalidFields
+            });
+
         }
 
         render () {
