@@ -75,7 +75,7 @@ class FormDemo extends Component {
                     <Validator
                         value={this.state.usernameValue}
                         onEnd={(isValid, message) => {
-                            this.props.getFromValya({
+                            this.props.setValidationInfo({
                                 isValid: isValid,
                                 message: message,
                                 name: 'username'
@@ -109,7 +109,7 @@ class FormDemo extends Component {
                     <Validator
                         value={this.state.passwordValue}
                         onEnd={(isValid, message) => {
-                            this.props.getFromValya({
+                            this.props.setValidationInfo({
                                 isValid: isValid,
                                 message: message,
                                 name: 'password'

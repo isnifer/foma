@@ -184,7 +184,7 @@
 	                        {
 	                            value: this.state.usernameValue,
 	                            onEnd: function (isValid, message) {
-	                                _this.props.getFromValya({
+	                                _this.props.setValidationInfo({
 	                                    isValid: isValid,
 	                                    message: message,
 	                                    name: 'username'
@@ -224,7 +224,7 @@
 	                        {
 	                            value: this.state.passwordValue,
 	                            onEnd: function (isValid, message) {
-	                                _this.props.getFromValya({
+	                                _this.props.setValidationInfo({
 	                                    isValid: isValid,
 	                                    message: message,
 	                                    name: 'password'
