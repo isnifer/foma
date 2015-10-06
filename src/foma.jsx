@@ -13,8 +13,11 @@ export default Foma => {
                 isValid: true,
                 isValidating: false,
                 isInvalid: false,
-                invalidFields: [],
-                setValidationInfo: ::this.setValidationInfo
+                invalidFields: []
+            };
+
+            this.api = {
+                setValidationInfo: this.setValidationInfo.bind(this)
             };
 
             // I want to manage fields without re-render
@@ -61,7 +64,7 @@ export default Foma => {
 
         render () {
             return (
-                <Foma {...this.props} {...this.state}>
+                <Foma {...this.api} {...this.props} {...this.state}>
                     {this.props.children}
                 </Foma>
             );

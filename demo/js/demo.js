@@ -42593,7 +42593,10 @@
 	                isValid: true,
 	                isValidating: false,
 	                isInvalid: false,
-	                invalidFields: [],
+	                invalidFields: []
+	            };
+
+	            this.api = {
 	                setValidationInfo: this.setValidationInfo.bind(this)
 	            };
 
@@ -42645,7 +42648,7 @@
 	            value: function render() {
 	                return _react2['default'].createElement(
 	                    Foma,
-	                    _extends({}, this.props, this.state),
+	                    _extends({}, this.api, this.props, this.state),
 	                    this.props.children
 	                );
 	            }
