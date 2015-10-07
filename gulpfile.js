@@ -1,10 +1,10 @@
 var gulp = require('gulp');
 var connect = require('gulp-connect');
 
-var jsx = ['./demo/js/demo.js'];
+var js = ['./demo/js/demo.js'];
 
 gulp.task('js', function () {
-  return gulp.src(jsx)
+  return gulp.src(js)
       .pipe(connect.reload());
 });
 
@@ -12,12 +12,12 @@ gulp.task('connect', function() {
     connect.server({
         root: 'demo',
         livereload: true,
-        port: 12453
+        port: 12934
     });
 });
 
 gulp.task('watch', function () {
-    gulp.watch(jsx, ['js']);
+    gulp.watch(js, ['js']);
 });
 
 gulp.task('default', ['connect', 'watch']);

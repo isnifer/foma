@@ -1,4 +1,5 @@
 import React from 'react';
+import FomaWarning from 'foma-warning';
 
 const { Component, PropTypes } = React;
 
@@ -10,14 +11,19 @@ export default Foma => {
             super(props, context);
 
             this.state = {
+                invalidFields: [],
+                isInvalid: false,
                 isValid: true,
                 isValidating: false,
-                isInvalid: false,
-                invalidFields: []
+                isWarnVisible: false
             };
 
             this.api = {
-                setValidationInfo: this.setValidationInfo.bind(this)
+                foma: {
+                    setValidationInfo: this.setValidationInfo.bind(this),
+                    viewWarning: this.viewWarning.bind(this),
+                    renderWarning: this.renderWarning.bind(this)
+                }
             };
 
             // I want to manage fields without re-render
@@ -60,6 +66,20 @@ export default Foma => {
                 invalidFields: invalidFields
             });
 
+        }
+
+        viewWarning (bool) {
+            this.setState({isWarnVisible: bool ? Date.now() : bool});
+        }
+
+        renderWarning ({message, items}) {
+            return (
+                <FomaWarning
+                    message={message}
+                    items={items}
+                    visible={this.state.isWarnVisible}>
+                </FomaWarning>
+            );
         }
 
         render () {

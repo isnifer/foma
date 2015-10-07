@@ -31,8 +31,8 @@
   },
   "homepage": "https://github.com/isnifer/foma#readme",
   "dependencies": {
-    "react": "0.13.x",
-    "valya": "0.2.x"
+    "foma-warning": "0.x",
+    "react": "0.14.x"
   },
   "devDependencies": {
     "babel": "^5.8.21",
@@ -44,9 +44,11 @@
     "isparta": "^3.0.4",
     "istanbul": "^0.3.21",
     "jsdom": "^6.5.1",
+    "react-dom": "^0.14.0",
     "rimraf": "^2.4.3",
     "tap-spec": "^4.1.0",
     "tape": "^4.2.0",
+    "valya": "0.2.x",
     "webpack": "^1.11.0"
   }
 }

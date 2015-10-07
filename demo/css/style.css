@@ -1,0 +1,65 @@
+.foma-warning {
+    padding: 15px 20px;
+    background: #fffdc7;
+    border: 1px solid #e1d282;
+    box-shadow: 0 2px 3px rgba(77, 47, 0, 0.1);
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: block;
+}
+
+.foma-warning__item {
+    color: #50808a;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.chrome,
+.firefox,
+.opera,
+.safari {
+    color: #fff;
+    font-size: 2.4em;
+    text-align: center;
+    line-height: 100px;
+    height: 100px;
+    width: 220px;
+    display: inline-block;
+    margin: 0 5px 5px 0;
+    cursor: pointer;
+    text-transform: uppercase;
+    position: relative;
+}
+
+.chrome {
+    background: green;
+}
+
+.firefox {
+    background: orange;
+}
+
+.opera {
+    background: red;
+}
+
+.safari {
+    background: blue;
+}
+
+.selected {
+    background: black;
+}
+
+.selected:before {
+    content: 'You selected';
+    font-size: 13px;
+    position: absolute;
+    display: block;
+    height: 20px;
+    width: 100%;
+    text-align: center;
+    top: 10px;
+    left: 0;
+    line-height: 1.9;
+}
