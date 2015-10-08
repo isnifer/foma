@@ -82,7 +82,7 @@ class FormDemo extends Component {
             this.props.foma.viewWarning(true);
         }
 
-        return event.preventDefault()
+        return event.preventDefault();
     }
 
     setUsername (e) {

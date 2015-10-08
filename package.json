@@ -8,10 +8,11 @@
     "build": "babel src -o lib/index.js",
     "demo": "webpack demo/jsx/demo.jsx demo/js/demo.js --module-bind 'jsx=babel?stage=0' -w",
     "test": "babel-node test/lib/index.js | tap-spec",
-    "test:watch": "nodemon --exec \"babel-node test/lib/index.js | tap-spec\" -w test/lib/index.js",
+    "test:watch": "nodemon --exec \"babel-node test/lib/index.js | tap-spec\" -w test",
     "travis": "npm run coveralls",
     "prepublish": "npm run build",
     "coverage": "babel-node node_modules/.bin/isparta cover --report lcovonly test/lib/index.js | tap-spec",
+    "coverage:watch": "nodemon --exec \"npm run coverage\" -w test",
     "coveralls": "npm run coverage && coveralls < coverage/lcov.info && rimraf ./coverage"
   },
   "repository": {
@@ -44,6 +45,7 @@
     "isparta": "^3.0.4",
     "istanbul": "^0.3.21",
     "jsdom": "^6.5.1",
+    "react-addons-test-utils": "^0.14.0",
     "react-dom": "^0.14.0",
     "rimraf": "^2.4.3",
     "tap-spec": "^4.1.0",

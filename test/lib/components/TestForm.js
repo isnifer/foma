@@ -32,6 +32,15 @@ class Validator extends Component {
     }
 }
 
+const requiredFields = {
+    username: {
+        name: 'awesome username'
+    },
+    password: {
+        name: 'awesome password'
+    }
+};
+
 @Foma
 export default class TestForm extends Component {
     static displayName = 'TestForm';
@@ -53,17 +62,29 @@ export default class TestForm extends Component {
         this.setState({password: e.target.value});
     }
 
+    submitForm (event) {
+        if (this.props.isValid) {
+            this.setState({submitted: true});
+        } else {
+            this.props.foma.viewWarning(true);
+        }
+
+        return event.preventDefault();
+    }
+
     render () {
         return (
             <form noValidate>
                 <Validator
                     value={this.state.username}
                     onEnd={(isValid, message) => {
-                        this.props.setValidationInfo({
+                        this.props.foma.setValidationInfo({
                             isValid: isValid,
                             message: message,
                             name: 'username'
                         });
+
+                        this.props.testUsername(isValid, this.state.username);
                     }}
                     validators={[
                         {
@@ -84,6 +105,7 @@ export default class TestForm extends Component {
                         type="text"
                         id="username"
                         ref="username"
+                        name="username"
                         className="form-control"
                         value={this.state.username}
                         onChange={::this.setUsername} />
@@ -91,11 +113,13 @@ export default class TestForm extends Component {
                 <Validator
                     value={this.state.password}
                     onEnd={(isValid, message) => {
-                        this.props.setValidationInfo({
+                        this.props.foma.setValidationInfo({
                             isValid: isValid,
                             message: message,
                             name: 'password'
                         });
+
+                        this.props.testPass(isValid, this.state.password);
                     }}
                     validators={[
                         {
@@ -116,16 +140,30 @@ export default class TestForm extends Component {
                         type="text"
                         id="password"
                         ref="password"
+                        name="password"
                         className="form-control"
                         value={this.state.password}
                         onChange={::this.setPassword} />
                 </Validator>
+                <div className="form-group" ref="fomaWarning">
+                    {this.props.foma.renderWarning({
+                        message: 'These fields are required:',
+                        items: this.props.invalidFields.map(function (e) {
+                            return {
+                                fieldName: e,
+                                name: requiredFields[e].name,
+                                handler: requiredFields[e].handler
+                            }
+                        })
+                    })}
+                </div>
                 <button
                     type="submit"
                     ref="submit"
-                    disabled={!this.props.isValid}
-                    className="submit">
-                    {!this.props.isValid ? 'nonSubmit' : 'Submit'}
+                    disabled={this.props.isInvalid}
+                    className="submit"
+                    onClick={::this.submitForm}>
+                    Submit
                 </button>
             </form>
         );
