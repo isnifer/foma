@@ -41,20 +41,21 @@ export default Foma => {
             var invalidFields = this.state.invalidFields.slice();
             var idx = invalidFields.indexOf(validatorInfo.name);
 
-            // If Valya returned isValid and the field was valid before
-            // we will don't do anything
-            if (idx === -1 && validatorInfo.isValid) {
+            // Valid and NOT found ===OR=== Invalid and FOUND
+            if (validatorInfo.isValid && idx === -1 || !validatorInfo.isValid && idx !== -1) {
                 return;
             }
 
             this.setState({isValidating: true});
 
-            if (!validatorInfo.isValid) {
+            // Invalid and NOT found
+            if (idx === -1) {
                 invalidFields.push(validatorInfo.name);
-            } else {
-                if (idx !== -1) {
-                    invalidFields.splice(idx, 1);
-                }
+            }
+
+            // Valid and FOUND
+            else  {
+                invalidFields.splice(idx, 1);
             }
 
             this.fields[validatorInfo.name] = validatorInfo;
