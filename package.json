@@ -45,6 +45,7 @@
     "isparta": "^3.0.4",
     "istanbul": "^0.3.21",
     "jsdom": "^6.5.1",
+    "object-assign": "^4.0.1",
     "react-addons-test-utils": "^0.14.0",
     "react-dom": "^0.14.0",
     "rimraf": "^2.4.3",

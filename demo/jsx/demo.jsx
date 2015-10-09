@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Valya from 'valya';
 import Foma from '../../lib/index';
+import assign from 'object-assign';
 
 const { Component, PropTypes } = React;
 
@@ -61,6 +62,161 @@ const standardValidator = {
     }
 };
 
+const groupFields = {
+    company: {
+        name: 'ex-company'
+    },
+    state: {
+        name: 'state'
+    },
+    position: {
+        name: 'ex-position'
+    }
+};
+
+let groupFieldValidator = (fieldName, invalidFields) => {
+    return {
+        validator: (value, params) => {
+            if (value && parseInt(value) === 10 ||
+                !value && !invalidFields.length ||
+                !value && invalidFields.length === 1 && invalidFields[0] === fieldName) {
+                return Promise.resolve();
+            }
+
+            return Promise.reject(params.message);
+        },
+        params: {
+            message: fieldName + ' is required!'
+        }
+    }
+};
+
+/*const groupValidator = (...fieldNames) => {
+    return {
+        validator: (value, params) => {
+            if (value) {
+                return Promise.resolve();
+            }
+
+            return Promise.reject(params.message);
+        },
+        params: {
+            message: 'All fiedls are required'
+        }
+    };
+};*/
+
+@Foma
+class GroupComponent extends Component {
+    static displayName = 'GroupComponent';
+
+    static propTypes = {
+        index: PropTypes.number.isRequired,
+        group: PropTypes.object.isRequired,
+        setGroupField: PropTypes.func.isRequired,
+        updateParentValidation: PropTypes.func.isRequired,
+        allGroups: PropTypes.array.isRequired,
+        allInvalidGroups: PropTypes.number.isRequired
+    }
+
+    onEndCallback (name) {
+        return (isValid, message) => {
+            this.props.foma.setValidationInfo({isValid, message, name});
+        }
+    }
+
+    renderFields (fields) {
+        return fields.map((field, i) => {
+            return (
+                <div className="form-group" key={i}>
+                    <Validator
+                        value={this.props.group[field]}
+                        onEnd={this.onEndCallback(field)}
+                        validators={[groupFieldValidator(field, this.props.invalidFields)]}
+                        initialValidation={true}>
+                        <input
+                            type="text"
+                            id={field}
+                            name={field}
+                            placeholder={field}
+                            className="form-control"
+                            value={this.props.group[field]}
+                            onChange={this.props.setGroupField.bind(this, field, this.props.index)} />
+                    </Validator>
+                </div>
+            );
+        });
+    }
+
+    groupOnEndCallback (name) {
+        return (isValid, message) => {
+            this.props.updateParentValidation({isValid, message, name});
+        };
+    }
+
+    render () {
+        let fields = Object.keys(groupFields);
+
+        return (
+            <div className="form-field">
+                {this.renderFields(fields)}
+
+                <Validator
+                    value={this.props.group}
+                    onEnd={this.groupOnEndCallback('group ' + (this.props.index + 1))}
+                    initialValidation={true}
+                    validators={[
+                        {
+                            validator: (group, params) => {
+                                var notEmptyFields = fields.filter(function (e, i) {
+                                    return !(group[e] === '' || !group[e]);
+                                });
+
+                                var allFieldsAreEmpty = !notEmptyFields.length;
+                                var allRequiredFieldsFilled = notEmptyFields.length === fields.length;
+
+                                if (allFieldsAreEmpty) {
+
+                                    // Если групп две и более, то надо
+                                    // проверить индекс конкретной группы
+                                    // если он 0, то реджектить
+                                    if (this.props.allGroups.length === 1) {
+                                        return Promise.reject(params.allFieldsRequired);
+                                    }
+
+                                    if (this.props.allGroups.length > 1 && !this.props.index) {
+                                        return Promise.reject(params.allFieldsRequired);
+                                    }
+
+                                    return Promise.resolve();
+                                }
+
+                                if (allRequiredFieldsFilled) {
+                                    return new Promise((resolve, reject) => {
+                                        setTimeout(() => {
+                                            if (this.props.isValid) {
+                                                resolve();
+                                            } else {
+                                                reject(params.haveInvalidFields)
+                                            }
+                                        }, 0);
+                                    });
+                                }
+
+                                return Promise.reject(params.allFieldsRequired);
+                            },
+                            params: {
+                                allFieldsRequired: 'All fields are required',
+                                haveInvalidFields: 'You have invalid fields, fix it'
+                            }
+                        }
+                    ]}>
+                </Validator>
+            </div>
+        );
+    }
+}
+
 @Foma
 class FormDemo extends Component {
     static displayName = 'FormDemo';
@@ -71,7 +227,14 @@ class FormDemo extends Component {
         this.state = {
             username: null,
             password: null,
-            browser: null
+            browser: null,
+            groups: [
+                {
+                    company: null,
+                    state: null,
+                    position: null
+                }
+            ]
         };
     }
 
@@ -97,6 +260,32 @@ class FormDemo extends Component {
         this.setState({browser: browser});
     }
 
+    setGroupField (name, index, e) {
+        let groups = this.state.groups;
+        let group = assign({}, groups[index]);
+
+        group[name] = e.target.value;
+        groups[index] = group;
+
+        this.setState({groups: groups});
+    }
+
+    addGroup () {
+        let groups = this.state.groups.concat({
+            company: null,
+            state: null,
+            position: null
+        });
+
+        this.setState({groups: groups});
+    }
+
+    onEndCallback (name) {
+        return (isValid, message) => {
+            this.props.foma.setValidationInfo({isValid, message, name});
+        };
+    }
+
     render () {
         return (
             <form
@@ -110,13 +299,7 @@ class FormDemo extends Component {
                     <label htmlFor="username">Type your username</label>
                     <Validator
                         value={this.state.username}
-                        onEnd={(isValid, message) => {
-                            this.props.foma.setValidationInfo({
-                                isValid: isValid,
-                                message: message,
-                                name: 'username'
-                            });
-                        }}
+                        onEnd={this.onEndCallback('username')}
                         validators={[standardValidator]}
                         initialValidation={true}>
                         <input
@@ -132,13 +315,7 @@ class FormDemo extends Component {
                     <label htmlFor="password">Type your password</label>
                     <Validator
                         value={this.state.password}
-                        onEnd={(isValid, message) => {
-                            this.props.foma.setValidationInfo({
-                                isValid: isValid,
-                                message: message,
-                                name: 'password'
-                            });
-                        }}
+                        onEnd={this.onEndCallback('password')}
                         validators={[standardValidator]}
                         initialValidation={true}>
                         <input
@@ -153,13 +330,7 @@ class FormDemo extends Component {
                 <div className="form-group">
                     <Validator
                         value={this.state.browser}
-                        onEnd={(isValid, message) => {
-                            this.props.foma.setValidationInfo({
-                                isValid: isValid,
-                                message: message,
-                                name: 'browser'
-                            });
-                        }}
+                        onEnd={this.onEndCallback('browser')}
                         validators={[standardValidator]}
                         initialValidation={true}>
                         {['chrome', 'firefox', 'opera', 'safari'].map((browser) => {
@@ -174,6 +345,30 @@ class FormDemo extends Component {
                         })}
                     </Validator>
                 </div>
+
+                {this.state.groups.map((group, i) => {
+                    var props = {
+                        group: group,
+                        allGroups: this.state.groups,
+                        allInvalidGroups: this.props.childrenInvalidFields.length,
+                        setGroupField: ::this.setGroupField,
+                        updateParentValidation: ::this.props.foma.setChildrenValidationInfo,
+                        index: i,
+                        key: i
+                    };
+
+                    return <GroupComponent {...props} />;
+                })}
+
+                <div className="form-group">
+                    <button
+                        type="button"
+                        onClick={::this.addGroup}
+                        className="btn btn-info">
+                        Add group fields
+                    </button>
+                </div>
+
                 <div className="form-group">
                     {this.props.foma.renderWarning({
                         message: 'These fields are required:',
@@ -189,7 +384,7 @@ class FormDemo extends Component {
                 <div className="form-group">
                     <button
                         type="button"
-                        className={'btn btn-success' + (this.props.isInvalid ? ' disabled' : '')}
+                        className={'btn btn-success' + (this.props.isInvalid ? ' btn-danger' : '')}
                         onClick={::this.submitForm}>
                         OK! Watch me magic!
                     </button>

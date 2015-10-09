@@ -15,14 +15,16 @@ export default Foma => {
                 isInvalid: false,
                 isValid: true,
                 isValidating: false,
-                isWarnVisible: false
+                isWarnVisible: false,
+                childrenInvalidFields: []
             };
 
             this.api = {
                 foma: {
-                    setValidationInfo: this.setValidationInfo.bind(this),
-                    viewWarning: this.viewWarning.bind(this),
-                    renderWarning: this.renderWarning.bind(this)
+                    setValidationInfo: ::this.setValidationInfo,
+                    setChildrenValidationInfo: ::this.setChildrenValidationInfo,
+                    viewWarning: ::this.viewWarning,
+                    renderWarning: ::this.renderWarning
                 }
             };
 
@@ -30,23 +32,12 @@ export default Foma => {
             this.fields = {};
         }
 
-        /**
-         * Validation method for All form fields. All fields are required.
-         * @param {Object} validatorInfo - information from validator (Valya)
-         * @param {Boolean} validatorInfo#isValid - validation flag for the field
-         * @param {String} validatorInfo#message - validatation message for the field
-         * @param {String} validatorInfo#name - name of the field
-         */
-        setValidationInfo (validatorInfo) {
-            var invalidFields = this.state.invalidFields.slice();
-            var idx = invalidFields.indexOf(validatorInfo.name);
-
-            // Valid and NOT found ===OR=== Invalid and FOUND
-            if (validatorInfo.isValid && idx === -1 || !validatorInfo.isValid && idx !== -1) {
-                return;
-            }
-
-            this.setState({isValidating: true});
+        _manageInvalidFields (invalidFields, validatorInfo, idx) {
+            this.setState({
+                isValidating: true,
+                isValid: false,
+                isInvalid: true
+            });
 
             // Invalid and NOT found
             if (idx === -1) {
@@ -58,15 +49,65 @@ export default Foma => {
                 invalidFields.splice(idx, 1);
             }
 
+            return invalidFields;
+        }
+
+        /**
+         * Validation method for All form fields. All fields are required.
+         * @param {Object} validatorInfo - information from validator (Valya)
+         * @param {Boolean} validatorInfo#isValid - validation flag for the field
+         * @param {String} validatorInfo#message - validatation message for the field
+         * @param {String} validatorInfo#name - name of the field
+         */
+        setValidationInfo (validatorInfo) {
+            var invalidFields = this.state.invalidFields.slice();
+            var childrenInvalidFields = this.state.childrenInvalidFields;
+            var idx = invalidFields.indexOf(validatorInfo.name);
+
+            // Valid and NOT found ===OR=== Invalid and FOUND
+            if (validatorInfo.isValid && idx === -1 || !validatorInfo.isValid && idx !== -1) {
+                return;
+            }
+
+            invalidFields = this._manageInvalidFields(invalidFields, validatorInfo, idx);
+
+            // Made for future features, may be...
             this.fields[validatorInfo.name] = validatorInfo;
 
             this.setState({
                 isValidating: false,
-                isValid: !invalidFields.length,
-                isInvalid: Boolean(invalidFields.length),
+                isValid: !invalidFields.length && !childrenInvalidFields.length,
+                isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length),
                 invalidFields: invalidFields
             });
 
+        }
+
+        /**
+         * Validation method for child Foma instances. All fields are required.
+         * @param {Object} validatorInfo - information from validator (Valya)
+         * @param {Boolean} validatorInfo#isValid - validation flag for the field
+         * @param {String} validatorInfo#message - validatation message for the field
+         * @param {String} validatorInfo#name - name of the field
+         */
+        setChildrenValidationInfo (validatorInfo) {
+            var invalidFields = this.state.invalidFields;
+            var childrenInvalidFields = this.state.childrenInvalidFields.slice();
+            var idx = childrenInvalidFields.indexOf(validatorInfo.name);
+
+            // Valid and NOT found ===OR=== Invalid and FOUND
+            if (validatorInfo.isValid && idx === -1 || !validatorInfo.isValid && idx !== -1) {
+                return;
+            }
+
+            childrenInvalidFields = this._manageInvalidFields(childrenInvalidFields, validatorInfo, idx);
+
+            this.setState({
+                isValidating: false,
+                isValid: !invalidFields.length && !childrenInvalidFields.length,
+                isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length),
+                childrenInvalidFields: childrenInvalidFields
+            });
         }
 
         viewWarning (bool) {
