@@ -34,7 +34,7 @@
   "dependencies": {
     "foma-warning": "0.x",
     "react": "0.14.x",
-    "valya": "git+https://github.com/isnifer/valya.git#0bed299"
+    "valya": "git+https://github.com/isnifer/valya.git#876f69f"
   },
   "devDependencies": {
     "ava": "^0.4.2",
