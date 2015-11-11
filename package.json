@@ -9,7 +9,7 @@
     "demo": "webpack -w",
     "test": "ava test/lib/index.js",
     "test:watch": "nodemon --exec \"ava test/lib/index.js\" -w test",
-    "travis": "npm run coveralls",
+    "travis": "npm run test",
     "prepublish": "npm run build",
     "coverage": "babel-node node_modules/.bin/isparta cover --report lcovonly test/lib/index.js",
     "coverage:watch": "nodemon --exec \"npm run coverage\" -w test",
