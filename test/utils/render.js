@@ -1,7 +1,7 @@
 import React from 'react';
 import TestUtils from 'react-addons-test-utils';
 
-function render (component, props, ...children) {
+const render = (component, props, ...children) => {
     const shallowRenderer = TestUtils.createRenderer();
 
     shallowRenderer.render(

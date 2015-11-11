@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var connect = require('gulp-connect');
 
-var js = ['./demo/js/demo.js'];
+var js = ['./demo/js/demo.js', './demo/js/complex.js'];
 
 gulp.task('js', function () {
   return gulp.src(js)

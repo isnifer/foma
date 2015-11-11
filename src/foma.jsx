@@ -1,27 +1,33 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import FomaWarning from 'foma-warning';
-
-const { Component, PropTypes } = React;
 
 export default Foma => {
     return class extends Component {
         static displayName = 'Foma';
 
+        // If current Foma instance is a child
+        static contextTypes = {
+            foma: PropTypes.object
+        };
+
+        // For this instance children - Foma or Valya
+        static childContextTypes = {
+            foma: PropTypes.object.isRequired
+        };
+
         constructor (props, context) {
             super(props, context);
 
             this.state = {
-                invalidFields: [],
-                isInvalid: false,
-                isValid: true,
-                isValidating: false,
+                isInvalid: true,
+                isValid: false,
                 isWarnVisible: false,
+                isValidating: true,
                 childrenInvalidFields: []
             };
 
             this.api = {
                 foma: {
-                    setValidationInfo: ::this.setValidationInfo,
                     setChildrenValidationInfo: ::this.setChildrenValidationInfo,
                     viewWarning: ::this.viewWarning,
                     renderWarning: ::this.renderWarning
@@ -30,22 +36,35 @@ export default Foma => {
 
             // I want to manage fields without re-render
             this.fields = {};
+            this.invalidFields = [];
+            this.validatingFields = [];
         }
 
-        _manageInvalidFields (invalidFields, validatorInfo, idx) {
-            this.setState({
-                isValidating: true,
-                isValid: false,
-                isInvalid: true
-            });
+        getChildContext () {
+            return {
+                foma: {
+                    setValidationInfo: ::this.setValidationInfo,
+                    setChildrenValidationInfo: ::this.setChildrenValidationInfo
+                }
+            };
+        }
+
+        /**
+         * Common part for managing invalid fields
+         * @param  {Array} invalidFields - invalid fields array
+         * @param  {String} name - name of current field
+         * @param  {Number} idx - field's index in array
+         * @return {Array}
+         */
+        _updateInvalidFields (invalidFields, name, idx) {
 
             // Invalid and NOT found
             if (idx === -1) {
-                invalidFields.push(validatorInfo.name);
+                invalidFields.push(name);
             }
 
             // Valid and FOUND
-            else  {
+            else {
                 invalidFields.splice(idx, 1);
             }
 
@@ -54,56 +73,81 @@ export default Foma => {
 
         /**
          * Validation method for All form fields. All fields are required.
-         * @param {Object} validatorInfo - information from validator (Valya)
-         * @param {Boolean} validatorInfo#isValid - validation flag for the field
-         * @param {String} validatorInfo#message - validatation message for the field
-         * @param {String} validatorInfo#name - name of the field
+         * @param {Boolean} isValid - validation flag for the field
+         * @param {Boolean} isValidating - is validation in progress?
+         * @param {String} name - name of the field
          */
-        setValidationInfo (validatorInfo) {
-            var invalidFields = this.state.invalidFields.slice();
+        setValidationInfo ({isValid, isValidating, name}) {
+            var invalidFields = this.invalidFields.slice();
             var childrenInvalidFields = this.state.childrenInvalidFields;
-            var idx = invalidFields.indexOf(validatorInfo.name);
+            var idx = invalidFields.indexOf(name);
+            var idxIsValidating = this.validatingFields.indexOf(name);
 
-            // Valid and NOT found ===OR=== Invalid and FOUND
-            if (validatorInfo.isValid && idx === -1 || !validatorInfo.isValid && idx !== -1) {
+            // We will be store info about fields in Foma
+            // and update that when it will be need
+            this.fields[name] = {isValid, isValidating, name};
+
+            if (isValidating && idxIsValidating === -1) {
+                this.validatingFields.push(name);
+            }
+
+            if (!isValidating) {
+                this.validatingFields.splice(idxIsValidating, 1);
+            }
+
+            // (NOT Valid and NOT found in invalidFields) and validation in progress
+            if (!isValid && isValidating && name && idx === -1) {
+                this.invalidFields = invalidFields.concat(name);
+
+                if (!this.state.isValidating) {
+                    this.setState({
+                        isValidating: true,
+                        isValid: false,
+                        isInvalid: true
+                    });
+                }
+
                 return;
             }
 
-            invalidFields = this._manageInvalidFields(invalidFields, validatorInfo, idx);
+            // Valid and NOT found ===OR=== Invalid and FOUND
+            if (isValid && idx === -1 || !isValid && idx !== -1) {
+                return;
+            }
 
-            // Made for future features, may be...
-            this.fields[validatorInfo.name] = validatorInfo;
+            // (Invalid and NOT found ===OR=== Valid and FOUND) and validation end
+            invalidFields = this._updateInvalidFields(invalidFields, name, idx);
 
             this.setState({
                 isValidating: false,
                 isValid: !invalidFields.length && !childrenInvalidFields.length,
-                isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length),
-                invalidFields: invalidFields
+                isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length)
             });
 
+            this.invalidFields = invalidFields;
         }
 
         /**
          * Validation method for child Foma instances. All fields are required.
-         * @param {Object} validatorInfo - information from validator (Valya)
-         * @param {Boolean} validatorInfo#isValid - validation flag for the field
-         * @param {String} validatorInfo#message - validatation message for the field
-         * @param {String} validatorInfo#name - name of the field
+         * @param {Boolean} isValid - validation flag for the field
+         * @param {Boolean} isValidating - is validation in progress
+         * @param {String} name - name of the field
          */
-        setChildrenValidationInfo (validatorInfo) {
-            var invalidFields = this.state.invalidFields;
+        setChildrenValidationInfo ({isValid, isValidating, name}) {
+            var invalidFields = this.invalidFields;
             var childrenInvalidFields = this.state.childrenInvalidFields.slice();
-            var idx = childrenInvalidFields.indexOf(validatorInfo.name);
+            var idx = childrenInvalidFields.indexOf(name);
+
+            this.fields[name] = {isValid, isValidating, name};
 
             // Valid and NOT found ===OR=== Invalid and FOUND
-            if (validatorInfo.isValid && idx === -1 || !validatorInfo.isValid && idx !== -1) {
+            if (isValid && idx === -1 || !isValid && idx !== -1) {
                 return;
             }
 
-            childrenInvalidFields = this._manageInvalidFields(childrenInvalidFields, validatorInfo, idx);
+            childrenInvalidFields = this._updateInvalidFields(childrenInvalidFields, name, idx);
 
             this.setState({
-                isValidating: false,
                 isValid: !invalidFields.length && !childrenInvalidFields.length,
                 isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length),
                 childrenInvalidFields: childrenInvalidFields
@@ -114,19 +158,37 @@ export default Foma => {
             this.setState({isWarnVisible: bool ? Date.now() : bool});
         }
 
-        renderWarning ({message, items}) {
+        renderWarning ({message, requiredFields}) {
             return (
                 <FomaWarning
                     message={message}
-                    items={items}
+                    items={this.invalidFields.concat(this.state.childrenInvalidFields).map((fieldName) => {
+
+                        if (requiredFields) {
+                            let item = requiredFields[fieldName];
+
+                            return {
+                                fieldName,
+                                name: item.name,
+                                handler: item.handler
+                            }
+                        }
+
+                        return {
+                            fieldName,
+                            name: this.fields[fieldName].name
+                        }
+                    })}
                     visible={this.state.isWarnVisible}>
                 </FomaWarning>
             );
         }
 
         render () {
+            const invalidFields = {invalidFields: this.invalidFields};
+
             return (
-                <Foma {...this.api} {...this.props} {...this.state}>
+                <Foma {...this.api} {...this.props} {...this.state} {...invalidFields}>
                     {this.props.children}
                 </Foma>
             );

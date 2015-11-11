@@ -8,7 +8,7 @@ const { Component } = React;
 class Validator extends Component {
     static displayName = 'Validator';
 
-    _renderError() {
+    _renderError () {
         if (!this.props.enabled || this.props.isValid) {
             return null;
         }
@@ -77,13 +77,8 @@ export default class TestForm extends Component {
             <form noValidate>
                 <Validator
                     value={this.state.username}
+                    name="username"
                     onEnd={(isValid, message) => {
-                        this.props.foma.setValidationInfo({
-                            isValid: isValid,
-                            message: message,
-                            name: 'username'
-                        });
-
                         this.props.testUsername(isValid, this.state.username);
                     }}
                     validators={[
@@ -112,13 +107,8 @@ export default class TestForm extends Component {
                 </Validator>
                 <Validator
                     value={this.state.password}
+                    name="password"
                     onEnd={(isValid, message) => {
-                        this.props.foma.setValidationInfo({
-                            isValid: isValid,
-                            message: message,
-                            name: 'password'
-                        });
-
                         this.props.testPass(isValid, this.state.password);
                     }}
                     validators={[
@@ -148,7 +138,7 @@ export default class TestForm extends Component {
                 <div className="form-group" ref="fomaWarning">
                     {this.props.foma.renderWarning({
                         message: 'These fields are required:',
-                        items: this.props.invalidFields.map(function (e) {
+                        items: this.props.invalidFields.map(e => {
                             return {
                                 fieldName: e,
                                 name: requiredFields[e].name,
