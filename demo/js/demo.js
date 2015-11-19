@@ -171,7 +171,7 @@
 	                    _react2['default'].createElement(
 	                        'label',
 	                        { htmlFor: 'async' },
-	                        'Type your async name'
+	                        'Type your async username (invalid name isnifer)'
 	                    ),
 	                    _react2['default'].createElement(
 	                        _valya.Validator,
@@ -41473,7 +41473,12 @@
 	        return new Promise(function (resolve, reject) {
 	            setTimeout(function () {
 	                if (value) {
-	                    resolve();
+
+	                    if (value !== 'isnifer') {
+	                        resolve();
+	                    } else {
+	                        reject(params.isnifer);
+	                    }
 	                } else {
 	                    reject(params.message);
 	                }
@@ -41481,7 +41486,8 @@
 	        });
 	    },
 	    params: {
-	        message: 'Your name should be not empty'
+	        message: 'Your name should be not empty',
+	        isnifer: 'This username is mine'
 	    }
 	};
 	exports.asyncValidator = asyncValidator;

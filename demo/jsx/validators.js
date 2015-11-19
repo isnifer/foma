@@ -16,7 +16,13 @@ export const asyncValidator = {
         return new Promise ((resolve, reject) => {
             setTimeout(() => {
                 if (value) {
-                    resolve();
+
+                    if (value !== 'isnifer') {
+                        resolve();
+                    } else {
+                        reject(params.isnifer);
+                    }
+
                 } else {
                     reject(params.message);
                 }
@@ -24,6 +30,7 @@ export const asyncValidator = {
         });
     },
     params: {
-        message: 'Your name should be not empty'
+        message: 'Your name should be not empty',
+        isnifer: 'This username is mine'
     }
 };
