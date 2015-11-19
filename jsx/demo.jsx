@@ -74,7 +74,7 @@ class FormDemo extends Component {
                     </Validator>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="async">Type your async name</label>
+                    <label htmlFor="async">Type your async username (invalid name isnifer)</label>
                     <Validator
                         value={this.state.async}
                         name="async"
