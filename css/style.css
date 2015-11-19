@@ -63,3 +63,38 @@
     left: 0;
     line-height: 1.9;
 }
+
+.validator {
+    display: block;
+}
+
+.validator__target {
+    display: inline-block;
+    width: 100%;
+}
+
+.validator__error {
+    background: rgba(234, 97, 97, .8);
+    color: #fff;
+    display: inline-block;
+    margin-left: 15px;
+    position: absolute;
+    border-radius: 4px;
+    padding: 7px;
+}
+
+.validator__error:after {
+    right: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-color: rgba(234, 97, 97, 0);
+    border-right-color: rgba(234, 97, 97, .8);
+    border-width: 8px;
+    margin-top: -8px;
+}
+
