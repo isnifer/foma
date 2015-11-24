@@ -1,7 +1,6 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { render } from 'react-dom';
 import Foma from '../../lib/index';
-import assign from 'object-assign';
 import { Validator } from './valya';
 import { standardValidator, asyncValidator } from './validators';
 
