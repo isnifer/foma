@@ -46,6 +46,8 @@
 
 	'use strict';
 
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
@@ -60,36 +62,38 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(158);
+	var _reactLibReactDOM = __webpack_require__(3);
 
 	var _libIndex = __webpack_require__(393);
 
 	var _libIndex2 = _interopRequireDefault(_libIndex);
 
-	var _objectAssign = __webpack_require__(395);
-
-	var _objectAssign2 = _interopRequireDefault(_objectAssign);
-
 	var _valya = __webpack_require__(397);
 
 	var _validators = __webpack_require__(396);
 
-	var requiredFields = {
+	var browsers = ['chrome', 'firefox', 'opera', 'safari'];
+
+	var fields = {
 	    username: {
-	        name: 'awesome username'
-	    },
-	    browser: {
-	        name: 'the best ever browser',
-	        handler: function handler() {
-	            alert('Please, select browser before!');
-	        }
+	        validators: [_validators.standardValidator],
+	        filters: [function (value) {
+	            return parseInt(value) + 1;
+	        }],
+	        tip: 'username'
 	    },
 	    async: {
-	        name: 'async username'
+	        validators: [_validators.asyncValidator],
+	        tip: 'async username'
+	    },
+	    browser: {
+	        validators: [_validators.standardValidator],
+	        handler: function handler() {
+	            alert('Please, select browser before!');
+	        },
+	        tip: 'ваш любимый браузер'
 	    }
 	};
-
-	var browsers = ['chrome', 'firefox', 'opera', 'safari'];
 
 	var FormDemo = (function (_Component) {
 	    _inherits(FormDemo, _Component);
@@ -115,7 +119,7 @@
 	    _createClass(FormDemo, [{
 	        key: 'submitForm',
 	        value: function submitForm(event) {
-	            if (this.props.isValid) {
+	            if (this.props.foma.isValid) {
 	                alert('You\'re awesome');
 	            } else {
 	                this.props.foma.viewWarning(true);
@@ -124,19 +128,31 @@
 	            return event.preventDefault();
 	        }
 	    }, {
-	        key: 'setUsername',
-	        value: function setUsername(e) {
-	            this.setState({ username: e.target.value });
-	        }
-	    }, {
 	        key: 'setBrowser',
 	        value: function setBrowser(browser) {
 	            this.setState({ browser: browser });
 	        }
 	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            /*this.props.foma.api.setValues({
+	                username: {
+	                    value: 'Anton'
+	                },
+	                async: {
+	                    value: 'isnifer'
+	                },
+	                browser: {
+	                    value: 'opera'
+	                }
+	            });*/
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            var _this = this;
+
+	            var fields = this.props.foma.fields;
 
 	            return _react2['default'].createElement(
 	                'form',
@@ -150,19 +166,18 @@
 	                        'Type your username'
 	                    ),
 	                    _react2['default'].createElement(
-	                        _valya.Validator,
-	                        {
-	                            value: this.state.username,
-	                            name: 'username',
-	                            validators: [_validators.standardValidator],
-	                            silentInitValidation: true },
-	                        _react2['default'].createElement('input', {
-	                            type: 'text',
-	                            id: 'username',
-	                            name: 'username',
-	                            className: 'form-control',
-	                            value: this.state.username,
-	                            onChange: this.setUsername.bind(this) })
+	                        'span',
+	                        { className: 'validator' },
+	                        _react2['default'].createElement(
+	                            'span',
+	                            { className: 'validator__target' },
+	                            _react2['default'].createElement('input', _extends({ type: 'text', className: 'form-control' }, fields.username))
+	                        ),
+	                        fields.username.error && _react2['default'].createElement(
+	                            'span',
+	                            { className: 'validator__error' },
+	                            fields.username.error
+	                        )
 	                    )
 	                ),
 	                _react2['default'].createElement(
@@ -174,52 +189,38 @@
 	                        'Type your async username (invalid name isnifer)'
 	                    ),
 	                    _react2['default'].createElement(
-	                        _valya.Validator,
-	                        {
-	                            value: this.state.async,
-	                            name: 'async',
-	                            validators: [_validators.asyncValidator],
-	                            silentInitValidation: true },
-	                        _react2['default'].createElement('input', {
-	                            type: 'text',
-	                            id: 'async',
-	                            name: 'async',
-	                            className: 'form-control',
-	                            value: this.state.async,
-	                            onChange: function (event) {
-	                                _this.setState({ async: event.target.value });
-	                            } })
+	                        'span',
+	                        { className: 'validator' },
+	                        _react2['default'].createElement(
+	                            'span',
+	                            { className: 'validator__target' },
+	                            _react2['default'].createElement('input', _extends({ type: 'text', className: 'form-control' }, fields.async))
+	                        ),
+	                        fields.async.error && _react2['default'].createElement(
+	                            'span',
+	                            { className: 'validator__error' },
+	                            fields.async.error
+	                        )
 	                    )
 	                ),
 	                _react2['default'].createElement(
 	                    'div',
 	                    { className: 'form-group' },
-	                    _react2['default'].createElement(
-	                        _valya.Validator,
-	                        {
-	                            value: this.state.browser,
-	                            name: 'browser',
-	                            validators: [_validators.standardValidator],
-	                            silentInitValidation: true },
-	                        browsers.map(function (browser) {
-	                            return _react2['default'].createElement(
-	                                'div',
-	                                {
-	                                    className: browser + (_this.state.browser === browser ? ' selected' : ''),
-	                                    onClick: _this.setBrowser.bind(_this, browser),
-	                                    key: browser },
-	                                browser
-	                            );
-	                        })
-	                    )
-	                ),
-	                _react2['default'].createElement(
-	                    'div',
-	                    { className: 'form-group' },
-	                    this.props.foma.renderWarning({
-	                        message: 'These fields are required:',
-	                        requiredFields: requiredFields
+	                    browsers.map(function (browser) {
+	                        return _react2['default'].createElement(
+	                            'div',
+	                            {
+	                                className: browser + (fields.browser.value === browser ? ' selected' : ''),
+	                                onClick: _this.setBrowser.bind(_this, browser),
+	                                key: browser },
+	                            browser
+	                        );
 	                    })
+	                ),
+	                _react2['default'].createElement(
+	                    'div',
+	                    { className: 'form-group' },
+	                    this.props.foma.renderWarning({ message: 'These fields are required:' })
 	                ),
 	                _react2['default'].createElement(
 	                    'div',
@@ -228,7 +229,7 @@
 	                        'button',
 	                        {
 	                            type: 'button',
-	                            className: 'btn btn-success' + (this.props.isInvalid ? ' btn-danger' : ''),
+	                            className: 'btn btn-success' + (this.props.foma.isInvalid ? ' btn-danger' : ''),
 	                            onClick: this.submitForm.bind(this) },
 	                        'OK! Watch me magic!'
 	                    )
@@ -238,11 +239,11 @@
 	    }]);
 
 	    var _FormDemo = FormDemo;
-	    FormDemo = (0, _libIndex2['default'])(FormDemo) || FormDemo;
+	    FormDemo = (0, _libIndex2['default'])(fields)(FormDemo) || FormDemo;
 	    return FormDemo;
 	})(_react.Component);
 
-	(0, _reactDom.render)(_react2['default'].createElement(FormDemo, null), document.querySelector('.main'));
+	(0, _reactLibReactDOM.render)(_react2['default'].createElement(FormDemo, null), document.querySelector('.main'));
 
 /***/ },
 /* 1 */
@@ -19820,15 +19821,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 158 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = __webpack_require__(3);
-
-
-/***/ },
+/* 158 */,
 /* 159 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -41008,15 +41001,15 @@
 	    };
 	})();
 
-	var _get = function get(_x, _x2, _x3) {
+	var _get = function get(_x2, _x3, _x4) {
 	    var _again = true;_function: while (_again) {
-	        var object = _x,
-	            property = _x2,
-	            receiver = _x3;_again = false;if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
+	        var object = _x2,
+	            property = _x3,
+	            receiver = _x4;_again = false;if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
 	            var parent = Object.getPrototypeOf(object);if (parent === null) {
 	                return undefined;
 	            } else {
-	                _x = parent;_x2 = property;_x3 = receiver;_again = true;desc = parent = undefined;continue _function;
+	                _x2 = parent;_x3 = property;_x4 = receiver;_again = true;desc = parent = undefined;continue _function;
 	            }
 	        } else if ('value' in desc) {
 	            return desc.value;
@@ -41030,6 +41023,14 @@
 
 	function _interopRequireDefault(obj) {
 	    return obj && obj.__esModule ? obj : { 'default': obj };
+	}
+
+	function _defineProperty(obj, key, value) {
+	    if (key in obj) {
+	        Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+	    } else {
+	        obj[key] = value;
+	    }return obj;
 	}
 
 	function _classCallCheck(instance, Constructor) {
@@ -41052,233 +41053,337 @@
 
 	var _fomaWarning2 = _interopRequireDefault(_fomaWarning);
 
-	exports['default'] = function (Foma) {
-	    return (function (_Component) {
-	        _inherits(_class, _Component);
+	exports['default'] = function (fields) {
+	    var validationType = arguments.length <= 1 || arguments[1] === undefined ? 'blur' : arguments[1];
 
-	        _createClass(_class, null, [{
-	            key: 'displayName',
-	            value: 'Foma',
+	    return function (FormComponent) {
+	        return (function (_Component) {
+	            _inherits(_class, _Component);
 
-	            // If current Foma instance is a child
-	            enumerable: true
-	        }, {
-	            key: 'contextTypes',
-	            value: {
-	                foma: _react.PropTypes.object
-	            },
+	            _createClass(_class, null, [{
+	                key: 'displayName',
+	                value: 'Foma',
 
-	            // For this instance children - Foma or Valya
-	            enumerable: true
-	        }, {
-	            key: 'childContextTypes',
-	            value: {
-	                foma: _react.PropTypes.object.isRequired
-	            },
-	            enumerable: true
-	        }]);
+	                // If current Foma instance is a child
+	                enumerable: true
+	            }, {
+	                key: 'contextTypes',
+	                value: {
+	                    foma: _react.PropTypes.object
+	                },
 
-	        function _class(props, context) {
-	            _classCallCheck(this, _class);
+	                // For this instance children - Foma or Valya
+	                enumerable: true
+	            }, {
+	                key: 'childContextTypes',
+	                value: {
+	                    foma: _react.PropTypes.object.isRequired
+	                },
+	                enumerable: true
+	            }]);
 
-	            _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props, context);
-
-	            this.state = {
-	                isInvalid: true,
-	                isValid: false,
-	                isWarnVisible: false,
-	                isValidating: true,
-	                childrenInvalidFields: []
-	            };
-
-	            this.api = {
-	                foma: {
-	                    setChildrenValidationInfo: this.setChildrenValidationInfo.bind(this),
-	                    viewWarning: this.viewWarning.bind(this),
-	                    renderWarning: this.renderWarning.bind(this)
-	                }
-	            };
-
-	            // I want to manage fields without re-render
-	            this.fields = {};
-	            this.invalidFields = [];
-	            this.validatingFields = [];
-	        }
-
-	        _createClass(_class, [{
-	            key: 'getChildContext',
-	            value: function getChildContext() {
-	                return {
-	                    foma: {
-	                        setValidationInfo: this.setValidationInfo.bind(this),
-	                        setChildrenValidationInfo: this.setChildrenValidationInfo.bind(this)
-	                    }
-	                };
-	            }
-
-	            /**
-	             * Common part for managing invalid fields
-	             * @param  {Array} invalidFields - invalid fields array
-	             * @param  {String} name - name of current field
-	             * @param  {Number} idx - field's index in array
-	             * @return {Array}
-	             */
-	        }, {
-	            key: '_updateInvalidFields',
-	            value: function _updateInvalidFields(invalidFields, name, idx) {
-
-	                // Invalid and NOT found
-	                if (idx === -1) {
-	                    invalidFields.push(name);
-	                }
-
-	                // Valid and FOUND
-	                else {
-	                        invalidFields.splice(idx, 1);
-	                    }
-
-	                return invalidFields;
-	            }
-
-	            /**
-	             * Validation method for All form fields. All fields are required.
-	             * @param {Boolean} isValid - validation flag for the field
-	             * @param {Boolean} isValidating - is validation in progress?
-	             * @param {String} name - name of the field
-	             */
-	        }, {
-	            key: 'setValidationInfo',
-	            value: function setValidationInfo(_ref) {
-	                var isValid = _ref.isValid;
-	                var isValidating = _ref.isValidating;
-	                var name = _ref.name;
-
-	                var invalidFields = this.invalidFields.slice();
-	                var childrenInvalidFields = this.state.childrenInvalidFields;
-	                var idx = invalidFields.indexOf(name);
-	                var idxIsValidating = this.validatingFields.indexOf(name);
-
-	                // We will be store info about fields in Foma
-	                // and update that when it will be need
-	                this.fields[name] = { isValid: isValid, isValidating: isValidating, name: name };
-
-	                if (isValidating && idxIsValidating === -1) {
-	                    this.validatingFields.push(name);
-	                }
-
-	                if (!isValidating) {
-	                    this.validatingFields.splice(idxIsValidating, 1);
-	                }
-
-	                // (NOT Valid and NOT found in invalidFields) and validation in progress
-	                if (!isValid && isValidating && name && idx === -1) {
-	                    this.invalidFields = invalidFields.concat(name);
-
-	                    if (!this.state.isValidating) {
-	                        this.setState({
-	                            isValidating: true,
-	                            isValid: false,
-	                            isInvalid: true
-	                        });
-	                    }
-
-	                    return;
-	                }
-
-	                // Valid and NOT found ===OR=== Invalid and FOUND
-	                if (isValid && idx === -1 || !isValid && idx !== -1) {
-	                    return;
-	                }
-
-	                // (Invalid and NOT found ===OR=== Valid and FOUND) and validation end
-	                invalidFields = this._updateInvalidFields(invalidFields, name, idx);
-
-	                this.setState({
-	                    isValidating: false,
-	                    isValid: !invalidFields.length && !childrenInvalidFields.length,
-	                    isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length)
-	                });
-
-	                this.invalidFields = invalidFields;
-	            }
-
-	            /**
-	             * Validation method for child Foma instances. All fields are required.
-	             * @param {Boolean} isValid - validation flag for the field
-	             * @param {Boolean} isValidating - is validation in progress
-	             * @param {String} name - name of the field
-	             */
-	        }, {
-	            key: 'setChildrenValidationInfo',
-	            value: function setChildrenValidationInfo(_ref2) {
-	                var isValid = _ref2.isValid;
-	                var isValidating = _ref2.isValidating;
-	                var name = _ref2.name;
-
-	                var invalidFields = this.invalidFields;
-	                var childrenInvalidFields = this.state.childrenInvalidFields.slice();
-	                var idx = childrenInvalidFields.indexOf(name);
-
-	                this.fields[name] = { isValid: isValid, isValidating: isValidating, name: name };
-
-	                // Valid and NOT found ===OR=== Invalid and FOUND
-	                if (isValid && idx === -1 || !isValid && idx !== -1) {
-	                    return;
-	                }
-
-	                childrenInvalidFields = this._updateInvalidFields(childrenInvalidFields, name, idx);
-
-	                this.setState({
-	                    isValid: !invalidFields.length && !childrenInvalidFields.length,
-	                    isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length),
-	                    childrenInvalidFields: childrenInvalidFields
-	                });
-	            }
-	        }, {
-	            key: 'viewWarning',
-	            value: function viewWarning(bool) {
-	                this.setState({ isWarnVisible: bool ? Date.now() : bool });
-	            }
-	        }, {
-	            key: 'renderWarning',
-	            value: function renderWarning(_ref3) {
+	            function _class(props, context) {
 	                var _this = this;
 
-	                var message = _ref3.message;
-	                var requiredFields = _ref3.requiredFields;
+	                _classCallCheck(this, _class);
 
-	                return _react2['default'].createElement(_fomaWarning2['default'], {
-	                    message: message,
-	                    items: this.invalidFields.concat(this.state.childrenInvalidFields).map(function (fieldName) {
+	                _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props, context);
 
-	                        if (requiredFields) {
-	                            var item = requiredFields[fieldName];
+	                var updatedFields = {};
+	                var fieldKeys = [];
 
-	                            return {
-	                                fieldName: fieldName,
-	                                name: item.name,
-	                                handler: item.handler
-	                            };
+	                if (fields instanceof Array) {
+	                    fields = fields.reduce(function (result, item) {
+	                        result[item.name] = item;
+	                        fieldKeys.push(item.name);
+	                    }, {});
+	                } else {
+	                    updatedFields = fields;
+	                    fieldKeys = Object.keys(fields);
+	                }
+
+	                this.state = {
+	                    isInvalid: true,
+	                    isValid: false,
+	                    isWarnVisible: false,
+	                    isValidating: true,
+	                    fields: updatedFields,
+	                    childrenInvalidFields: []
+	                };
+
+	                fieldKeys.forEach(function (key) {
+	                    var fields = _this.state.fields;
+
+	                    // props
+	                    fields[key].name = fields[key].name || key;
+	                    fields[key].value = fields[key].value || null;
+
+	                    _this._validate(fields[key].value, key, true);
+
+	                    // handlers
+	                    fields[key].onChange = function (_ref) {
+	                        var target = _ref.target;
+
+	                        var currentFields = Object.assign({}, _this.state.fields);
+	                        var field = Object.assign({}, currentFields[key]);
+
+	                        if (field.filters) {
+	                            field.value = field.filters[0](target.value);
+	                        } else {
+	                            field.value = target.value;
 	                        }
 
-	                        return {
-	                            fieldName: fieldName,
-	                            name: _this.fields[fieldName].name
-	                        };
-	                    }),
-	                    visible: this.state.isWarnVisible });
-	            }
-	        }, {
-	            key: 'render',
-	            value: function render() {
-	                var invalidFields = { invalidFields: this.invalidFields };
+	                        currentFields = _extends({}, currentFields, _defineProperty({}, key, field));
+	                        _this.setState({ fields: currentFields });
+	                    };
 
-	                return _react2['default'].createElement(Foma, _extends({}, this.api, this.props, this.state, invalidFields), this.props.children);
-	            }
-	        }]);
+	                    fields[key].onBlur = function (_ref2) {
+	                        var target = _ref2.target;
 
-	        return _class;
-	    })(_react.Component);
+	                        _this._validate(target.value, key);
+	                    };
+	                });
+
+	                this.api = {
+	                    setChildrenValidationInfo: this.setChildrenValidationInfo.bind(this),
+	                    viewWarning: this.viewWarning.bind(this),
+	                    renderWarning: this.renderWarning.bind(this),
+	                    setValues: this.setValues.bind(this)
+	                };
+
+	                this.fieldKeys = fieldKeys;
+
+	                // I want to manage fields without re-render
+	                this.fields = {};
+	                this.invalidFields = [];
+	                this.validatingFields = [];
+	            }
+
+	            _createClass(_class, [{
+	                key: 'getChildContext',
+	                value: function getChildContext() {
+	                    return {
+	                        foma: {
+	                            setValidationInfo: this.setValidationInfo.bind(this),
+	                            setChildrenValidationInfo: this.setChildrenValidationInfo.bind(this)
+	                        }
+	                    };
+	                }
+
+	                /**
+	                 * Common part for managing invalid fields
+	                 * @param  {Array} invalidFields - invalid fields array
+	                 * @param  {String} name - name of current field
+	                 * @param  {Number} idx - field's index in array
+	                 * @return {Array}
+	                 */
+	            }, {
+	                key: '_updateInvalidFields',
+	                value: function _updateInvalidFields(invalidFields, name, idx) {
+
+	                    // Invalid and NOT found
+	                    if (idx === -1) {
+	                        invalidFields.push(name);
+	                    }
+
+	                    // Valid and FOUND
+	                    else {
+	                            invalidFields.splice(idx, 1);
+	                        }
+
+	                    return invalidFields;
+	                }
+
+	                /**
+	                 * Validation method for All form fields. All fields are required.
+	                 * @param {Boolean} isValid - validation flag for the field
+	                 * @param {Boolean} isValidating - is validation in progress?
+	                 * @param {String} name - name of the field
+	                 */
+	            }, {
+	                key: 'setValidationInfo',
+	                value: function setValidationInfo(_ref3) {
+	                    var isValid = _ref3.isValid;
+	                    var isValidating = _ref3.isValidating;
+	                    var name = _ref3.name;
+
+	                    var invalidFields = this.invalidFields.slice();
+	                    var childrenInvalidFields = this.state.childrenInvalidFields;
+	                    var idx = invalidFields.indexOf(name);
+	                    var idxIsValidating = this.validatingFields.indexOf(name);
+
+	                    // We will be store info about fields in Foma
+	                    // and update that when it will be need
+	                    this.fields[name] = { isValid: isValid, isValidating: isValidating, name: name };
+
+	                    if (isValidating && idxIsValidating === -1) {
+	                        this.validatingFields.push(name);
+	                    }
+
+	                    if (!isValidating) {
+	                        this.validatingFields.splice(idxIsValidating, 1);
+	                    }
+
+	                    // (NOT Valid and NOT found in invalidFields) and validation in progress
+	                    if (!isValid && isValidating && name && idx === -1) {
+	                        this.invalidFields = invalidFields.concat(name);
+
+	                        if (!this.state.isValidating) {
+	                            this.setState({
+	                                isValidating: true,
+	                                isValid: false,
+	                                isInvalid: true
+	                            });
+	                        }
+
+	                        return;
+	                    }
+
+	                    // Valid and NOT found ===OR=== Invalid and FOUND
+	                    if (isValid && idx === -1 || !isValid && idx !== -1) {
+	                        return;
+	                    }
+
+	                    // (Invalid and NOT found ===OR=== Valid and FOUND) and validation end
+	                    invalidFields = this._updateInvalidFields(invalidFields, name, idx);
+
+	                    this.setState({
+	                        isValidating: false,
+	                        isValid: !invalidFields.length && !childrenInvalidFields.length,
+	                        isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length)
+	                    });
+
+	                    this.invalidFields = invalidFields;
+	                }
+
+	                /**
+	                 * Validation method for child Foma instances. All fields are required.
+	                 * @param {Boolean} isValid - validation flag for the field
+	                 * @param {Boolean} isValidating - is validation in progress
+	                 * @param {String} name - name of the field
+	                 */
+	            }, {
+	                key: 'setChildrenValidationInfo',
+	                value: function setChildrenValidationInfo(_ref4) {
+	                    var isValid = _ref4.isValid;
+	                    var isValidating = _ref4.isValidating;
+	                    var name = _ref4.name;
+
+	                    var invalidFields = this.invalidFields;
+	                    var childrenInvalidFields = this.state.childrenInvalidFields.slice();
+	                    var idx = childrenInvalidFields.indexOf(name);
+
+	                    this.fields[name] = { isValid: isValid, isValidating: isValidating, name: name };
+
+	                    // Valid and NOT found ===OR=== Invalid and FOUND
+	                    if (isValid && idx === -1 || !isValid && idx !== -1) {
+	                        return;
+	                    }
+
+	                    childrenInvalidFields = this._updateInvalidFields(childrenInvalidFields, name, idx);
+
+	                    this.setState({
+	                        isValid: !invalidFields.length && !childrenInvalidFields.length,
+	                        isInvalid: Boolean(invalidFields.length) || Boolean(childrenInvalidFields.length),
+	                        childrenInvalidFields: childrenInvalidFields
+	                    });
+	                }
+	            }, {
+	                key: 'viewWarning',
+	                value: function viewWarning(bool) {
+	                    this.setState({ isWarnVisible: bool ? Date.now() : bool });
+	                }
+	            }, {
+	                key: 'renderWarning',
+	                value: function renderWarning(_ref5) {
+	                    var _this2 = this;
+
+	                    var message = _ref5.message;
+
+	                    return _react2['default'].createElement(_fomaWarning2['default'], {
+	                        message: message,
+	                        items: this.invalidFields.concat(this.state.childrenInvalidFields).map(function (fieldName) {
+	                            return {
+	                                fieldName: fieldName,
+	                                name: _this2.state.fields[fieldName].tip
+	                            };
+	                        }),
+	                        visible: this.state.isWarnVisible });
+	                }
+	            }, {
+	                key: 'setValues',
+	                value: function setValues(values) {
+	                    var fields = this.state.fields;
+	                    fields = Object.assign({}, this.state.fields, values);
+	                    this.setState({ fields: fields });
+	                }
+	            }, {
+	                key: '_onFinishValidation',
+	                value: function _onFinishValidation(field, initial, message) {
+	                    if (!initial) {
+	                        field.error = message || null;
+	                    }
+
+	                    field.initialError = message || null;
+	                    var idx = this.invalidFields.indexOf(field.name);
+	                    var updatedFields = _extends({}, this.state.fields, _defineProperty({}, field.name, field));
+	                    var isValid = false;
+
+	                    if (!message) {
+	                        isValid = this.fieldKeys.reduce(function (result, item) {
+	                            if (!result || updatedFields[item].initialError) {
+	                                return false;
+	                            }
+
+	                            return true;
+	                        }, true);
+
+	                        if (idx !== -1) {
+	                            this.invalidFields.splice(idx, 1);
+	                        }
+	                    } else {
+	                        if (idx === -1) {
+	                            this.invalidFields.push(field.name);
+	                        }
+	                    }
+
+	                    var state = { isValid: isValid, isInvalid: !isValid };
+
+	                    if (!initial) {
+	                        state.fields = updatedFields;
+	                    }
+
+	                    this.setState(state);
+	                }
+	            }, {
+	                key: '_validate',
+	                value: function _validate(value, name, initial) {
+	                    var fields = this.state.fields;
+	                    var field = Object.assign({}, fields[name]);
+	                    var validators = field.validators;
+
+	                    validators.reduce(function (sequence, next) {
+	                        return sequence.then(function () {
+	                            return next.validator(value, next.params);
+	                        });
+	                    }, Promise.resolve()).then(this._onFinishValidation.bind(this, field, initial))['catch'](this._onFinishValidation.bind(this, field, initial));
+	                }
+	            }, {
+	                key: 'render',
+	                value: function render() {
+	                    var props = {
+	                        foma: _extends({
+	                            invalidFields: this.invalidFields
+	                        }, this.api, this.state, this.props)
+	                    };
+
+	                    return _react2['default'].createElement(FormComponent, props);
+	                }
+	            }]);
+
+	            return _class;
+	        })(_react.Component);
+	    };
 	};
 
 	module.exports = exports['default'];
@@ -41401,51 +41506,7 @@
 
 
 /***/ },
-/* 395 */
-/***/ function(module, exports) {
-
-	/* eslint-disable no-unused-vars */
-	'use strict';
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-	function toObject(val) {
-		if (val === null || val === undefined) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var to = toObject(target);
-		var symbols;
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = Object(arguments[s]);
-
-			for (var key in from) {
-				if (hasOwnProperty.call(from, key)) {
-					to[key] = from[key];
-				}
-			}
-
-			if (Object.getOwnPropertySymbols) {
-				symbols = Object.getOwnPropertySymbols(from);
-				for (var i = 0; i < symbols.length; i++) {
-					if (propIsEnumerable.call(from, symbols[i])) {
-						to[symbols[i]] = from[symbols[i]];
-					}
-				}
-			}
-		}
-
-		return to;
-	};
-
-
-/***/ },
+/* 395 */,
 /* 396 */
 /***/ function(module, exports) {
 
