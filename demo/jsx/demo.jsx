@@ -9,7 +9,6 @@ const browsers = ['chrome', 'firefox', 'opera', 'safari'];
 const fields = {
     username: {
         validators: [standardValidator],
-        filters: [(value) => parseInt(value) + 1],
         tip: 'username'
     },
     async: {
@@ -71,6 +70,11 @@ class FormDemo extends Component {
         return (
             <form name="formName" style={{width: '500px', padding: '50px 0 0 50px'}} noValidate>
                 <div className="form-group">
+                    {this.props.foma.isValidating &&
+                        <h1>Validating</h1>
+                    }
+                </div>
+                <div className="form-group">
                     <label htmlFor="username">Type your username</label>
                     <span className="validator">
                         <span className="validator__target">
@@ -114,7 +118,8 @@ class FormDemo extends Component {
                 <div className="form-group">
                     <button
                         type="button"
-                        className={'btn btn-success' + (this.props.foma.isInvalid ? ' btn-danger' : '')}
+                        className={'btn btn-success' +
+                            (this.props.foma.isInvalid || this.props.foma.isValidating ? ' btn-danger' : '')}
                         onClick={::this.submitForm}>
                         OK! Watch me magic!
                     </button>

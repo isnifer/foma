@@ -41,17 +41,24 @@ export default (fields, validationType = 'blur') => {
                     childrenInvalidFields: []
                 };
 
+                // I want to manage fields without re-render
+                this.fields = {};
+                this.invalidFields = [];
+                this.validatingFields = {};
+
                 fieldKeys.forEach(key => {
-                    const fields = this.state.fields;
+                    let fields = Object.assign({}, this.state.fields);
+                    let field = fields[key];
 
                     // props
-                    fields[key].name = fields[key].name || key;
-                    fields[key].value = fields[key].value || null;
+                    field.name = field.name || key;
+                    field.value = field.value || null;
 
-                    this._validate(fields[key].value, key, true);
+                    this._validate(field.value, key, true);
 
                     // handlers
-                    fields[key].onChange = ({target}) => {
+                    field.onChange = ({target}) => {
+                        console.log('CHANGE')
                         let currentFields = Object.assign({}, this.state.fields);
                         const field = Object.assign({}, currentFields[key]);
 
@@ -65,7 +72,8 @@ export default (fields, validationType = 'blur') => {
                         this.setState({fields: currentFields});
                     };
 
-                    fields[key].onBlur = ({target}) => {
+                    field.onBlur = ({target}) => {
+                        console.log('BLUR')
                         this._validate(target.value, key);
                     };
                 });
@@ -78,11 +86,6 @@ export default (fields, validationType = 'blur') => {
                 };
 
                 this.fieldKeys = fieldKeys;
-
-                // I want to manage fields without re-render
-                this.fields = {};
-                this.invalidFields = [];
-                this.validatingFields = [];
             }
 
             getChildContext () {
@@ -219,8 +222,7 @@ export default (fields, validationType = 'blur') => {
             }
 
             setValues (values) {
-                let fields = this.state.fields;
-                fields = Object.assign({}, this.state.fields, values);
+                let fields = Object.assign({}, this.state.fields, values);
                 this.setState({fields});
             }
 
@@ -229,19 +231,14 @@ export default (fields, validationType = 'blur') => {
                     field.error = message || null;
                 }
 
-                field.initialError = message || null;
-                let idx = this.invalidFields.indexOf(field.name);
-                let updatedFields = {...this.state.fields, ...{[field.name]: field}};
+                field.initError = message || null;
+
+                const idx = this.invalidFields.indexOf(field.name);
+                const fields = {...this.state.fields, ...{[field.name]: field}};
                 let isValid = false;
 
                 if (!message) {
-                    isValid = this.fieldKeys.reduce((result, item) => {
-                        if (!result || updatedFields[item].initialError) {
-                            return false;
-                        }
-
-                        return true;
-                    }, true);
+                    isValid = this.fieldKeys.reduce((result, item) => !(!result || fields[item].initError), true);
 
                     if (idx !== -1) {
                         this.invalidFields.splice(idx, 1);
@@ -252,11 +249,17 @@ export default (fields, validationType = 'blur') => {
                     }
                 }
 
-                const state = {isValid, isInvalid: !isValid};
+                delete this.validatingFields[field.name];
 
-                if (!initial) {
-                    state.fields = updatedFields;
-                }
+                const isValidating = Boolean(Object.keys(this.validatingFields).length);
+                console.log(message)
+                console.log(isValidating)
+                const state = {
+                    fields,
+                    isValid,
+                    isInvalid: !isValid,
+                    isValidating
+                };
 
                 this.setState(state);
             }
@@ -265,6 +268,13 @@ export default (fields, validationType = 'blur') => {
                 const fields = this.state.fields;
                 let field = Object.assign({}, fields[name]);
                 let { validators } = field;
+
+                this.validatingFields[name] = true;
+
+                if (!this.state.isValidating) {
+                    console.log('YAPPI')
+                    this.setState({isValidating: true});
+                }
 
                 validators
                     .reduce(

@@ -77,9 +77,6 @@
 	var fields = {
 	    username: {
 	        validators: [_validators.standardValidator],
-	        filters: [function (value) {
-	            return parseInt(value) + 1;
-	        }],
 	        tip: 'username'
 	    },
 	    async: {
@@ -160,6 +157,15 @@
 	                _react2['default'].createElement(
 	                    'div',
 	                    { className: 'form-group' },
+	                    this.props.foma.isValidating && _react2['default'].createElement(
+	                        'h1',
+	                        null,
+	                        'Validating'
+	                    )
+	                ),
+	                _react2['default'].createElement(
+	                    'div',
+	                    { className: 'form-group' },
 	                    _react2['default'].createElement(
 	                        'label',
 	                        { htmlFor: 'username' },
@@ -229,7 +235,7 @@
 	                        'button',
 	                        {
 	                            type: 'button',
-	                            className: 'btn btn-success' + (this.props.foma.isInvalid ? ' btn-danger' : ''),
+	                            className: 'btn btn-success' + (this.props.foma.isInvalid || this.props.foma.isValidating ? ' btn-danger' : ''),
 	                            onClick: this.submitForm.bind(this) },
 	                        'OK! Watch me magic!'
 	                    )
@@ -41111,19 +41117,26 @@
 	                    childrenInvalidFields: []
 	                };
 
+	                // I want to manage fields without re-render
+	                this.fields = {};
+	                this.invalidFields = [];
+	                this.validatingFields = {};
+
 	                fieldKeys.forEach(function (key) {
-	                    var fields = _this.state.fields;
+	                    var fields = Object.assign({}, _this.state.fields);
+	                    var field = fields[key];
 
 	                    // props
-	                    fields[key].name = fields[key].name || key;
-	                    fields[key].value = fields[key].value || null;
+	                    field.name = field.name || key;
+	                    field.value = field.value || null;
 
-	                    _this._validate(fields[key].value, key, true);
+	                    _this._validate(field.value, key, true);
 
 	                    // handlers
-	                    fields[key].onChange = function (_ref) {
+	                    field.onChange = function (_ref) {
 	                        var target = _ref.target;
 
+	                        console.log('CHANGE');
 	                        var currentFields = Object.assign({}, _this.state.fields);
 	                        var field = Object.assign({}, currentFields[key]);
 
@@ -41137,9 +41150,10 @@
 	                        _this.setState({ fields: currentFields });
 	                    };
 
-	                    fields[key].onBlur = function (_ref2) {
+	                    field.onBlur = function (_ref2) {
 	                        var target = _ref2.target;
 
+	                        console.log('BLUR');
 	                        _this._validate(target.value, key);
 	                    };
 	                });
@@ -41152,11 +41166,6 @@
 	                };
 
 	                this.fieldKeys = fieldKeys;
-
-	                // I want to manage fields without re-render
-	                this.fields = {};
-	                this.invalidFields = [];
-	                this.validatingFields = [];
 	            }
 
 	            _createClass(_class, [{
@@ -41313,8 +41322,7 @@
 	            }, {
 	                key: 'setValues',
 	                value: function setValues(values) {
-	                    var fields = this.state.fields;
-	                    fields = Object.assign({}, this.state.fields, values);
+	                    var fields = Object.assign({}, this.state.fields, values);
 	                    this.setState({ fields: fields });
 	                }
 	            }, {
@@ -41324,18 +41332,15 @@
 	                        field.error = message || null;
 	                    }
 
-	                    field.initialError = message || null;
+	                    field.initError = message || null;
+
 	                    var idx = this.invalidFields.indexOf(field.name);
-	                    var updatedFields = _extends({}, this.state.fields, _defineProperty({}, field.name, field));
+	                    var fields = _extends({}, this.state.fields, _defineProperty({}, field.name, field));
 	                    var isValid = false;
 
 	                    if (!message) {
 	                        isValid = this.fieldKeys.reduce(function (result, item) {
-	                            if (!result || updatedFields[item].initialError) {
-	                                return false;
-	                            }
-
-	                            return true;
+	                            return !(!result || fields[item].initError);
 	                        }, true);
 
 	                        if (idx !== -1) {
@@ -41347,11 +41352,17 @@
 	                        }
 	                    }
 
-	                    var state = { isValid: isValid, isInvalid: !isValid };
+	                    delete this.validatingFields[field.name];
 
-	                    if (!initial) {
-	                        state.fields = updatedFields;
-	                    }
+	                    var isValidating = Boolean(Object.keys(this.validatingFields).length);
+	                    console.log(message);
+	                    console.log(isValidating);
+	                    var state = {
+	                        fields: fields,
+	                        isValid: isValid,
+	                        isInvalid: !isValid,
+	                        isValidating: isValidating
+	                    };
 
 	                    this.setState(state);
 	                }
@@ -41361,6 +41372,13 @@
 	                    var fields = this.state.fields;
 	                    var field = Object.assign({}, fields[name]);
 	                    var validators = field.validators;
+
+	                    this.validatingFields[name] = true;
+
+	                    if (!this.state.isValidating) {
+	                        console.log('YAPPI');
+	                        this.setState({ isValidating: true });
+	                    }
 
 	                    validators.reduce(function (sequence, next) {
 	                        return sequence.then(function () {
